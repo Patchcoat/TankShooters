@@ -92,27 +92,27 @@ void loop() {
     // print command to serial and process command
     if (command & COMMAND_LEFT) {
       Serial.println("COMMAND LEFT");
-      xAngle-=20;     // Move horizontal servo 20° to the left
+      xAngle-=15;     // Move horizontal servo 20° to the left
     }
 
     if (command & COMMAND_RIGHT) {
       Serial.println("COMMAND RIGHT");
-      xAngle+=20;     // Move horizontal servo 20° to the right
+      xAngle+=15;     // Move horizontal servo 20° to the right
     }
 
     if (command & COMMAND_UP) {
       Serial.println("COMMAND UP");
-      yAngle-=20;     // Move vertical servo 20° downward
+      yAngle-=15;     // Move vertical servo 20° downward
     }
 
     if (command & COMMAND_DOWN) {
       Serial.println("COMMAND DOWN");
-      yAngle+=20;     // Move vertical servo 20° upward
+      yAngle+=15;     // Move vertical servo 20° upward
     }
 
     // Check that 0° ≤ angle ≤ 180° before sending it to the servo
     xAngle = clamp(0, 180, xAngle); 
-    yAngle = clamp(0, 180, yAngle);
+    yAngle = clamp(0, 220, yAngle);
   }
 
 
@@ -122,7 +122,5 @@ void loop() {
   // print data to Serial Monitor on Arduino IDE
   Serial.print("Servo Motor's Angle: ");
   Serial.print(xAngle);
-  Serial.print("°, ");
-  Serial.print(yAngle);
-  Serial.println("°");
+  Serial.println(yAngle);
 }
