@@ -1,11 +1,12 @@
 // Arduino joystick DC motor speed and rotation direction control using L293D
 // https://simple-circuit.com/arduino-joystick-motor-control/
 
-#define VX           A0   // VX pin of the joystick
-#define VY           A1   // VY pin of the joystick
-#define PWMA         9    // PWM signal for motor A
-#define PWMB         10   // PWM signal for motor B
-
+#define LR            A0
+#define FB            A1
+#define pwm1          9
+#define pwm2         10
+#define pwm3         5
+#define pwm4         6
 
 int motor_LR;
 int motor_FB;
