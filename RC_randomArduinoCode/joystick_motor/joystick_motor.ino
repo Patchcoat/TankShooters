@@ -4,14 +4,15 @@
 #define LR            A0
 #define FB            A1
 #define pwm1          9
-#define pwm2         10
-#define pwm3         5
-#define pwm4         6
+#define pwm2          10
+#define pwm3          5
+#define pwm4          6
 
 int motor_LR;
 int motor_FB;
 
 void setup() {
+  Serial.begin(9600);
   pinMode(pwm1,   OUTPUT);
   pinMode(pwm2,   OUTPUT);
   pinMode(pwm3,   OUTPUT);
@@ -23,6 +24,7 @@ void loop() {
   motor_FB = analogRead(FB);
   motor_LR >>= 1;
   motor_FB >>= 1;
+  
   if(motor_LR > 255){
     digitalWrite(pwm2, 0);
     analogWrite(pwm1, (motor_LR - 256));
