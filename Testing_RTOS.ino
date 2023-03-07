@@ -132,6 +132,7 @@ static void wirelessReadWriteController(void* pvParameters)
 
     // TODO read value from joystick queue
     // TODO write value into the airwaves
+    
   }
 }
 #endif
