@@ -1,0 +1,38 @@
+Motors - https://learn.sparkfun.com/tutorials/tb6612fng-hookup-guide/all
+
+
+Controller Transmitter
+->setup()
+  ->pinMode(PWMA, OUTPUT)
+  ->pinMode(PWMB, OUTPUT)
+->loop()
+  ->readXMotor(int VRX_M)
+  ->readYMotor(int VRY_M)
+  ->readXServo(int VRX_S)
+  ->readYServo(int VRY_S)
+  ->readSWLaser(int SW_L)
+  ->
+	
+
+CONTROLLER RECEIVER
+->setup()
+
+  ->pinMode(LED1, OUTPUT)
+  ->pinMode(LED2, OUTPUT)
+  ->pinMode(LED3, OUTPUT)
+
+->loop()
+
+  ->receiveButton()
+    ->if (button)
+      ->digitalWrite(LED1, HIGH)
+      ->digitalWrite(LED2, HIGH)
+      ->digitalWrite(LED3, HIGH)
+
+  ->receivePhoto()
+    ->if (LED1 && LED2 && LED3)
+      ->digitalWrite(LED1, LOW)
+    ->else if (!LED1 && LED2 && LED3)
+      ->digitalWrite(LED2, LOW)	
+    ->else (!LED1 && !LED2 && LED3)
+	->digitalWrite(LED3, LOW)	

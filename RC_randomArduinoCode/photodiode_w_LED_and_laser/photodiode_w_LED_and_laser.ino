@@ -52,14 +52,14 @@ void loop(){
   Serial.println(value);          // Display this value in the serial monitor
 
   // The threshold value can be changed as needed
-  if (value > 100){               
+  if (value > 20){               
     digitalWrite(LED, LOW);   // Turn LED off to indicate you lost a life
     hit = true;               // Indicates that your tank has been hit
   }
   else{
-//    digitalWrite(LED, HIGH);  // Turn LED on to indicate that you gained that life back
+    digitalWrite(LED, HIGH);  // Turn LED on to indicate that you gained that life back
     hit = false;              // Indicates that your tank has not been hit
 
-  delay(10); //Small delay so that if the laser just briefly passes over diode then we catch it
+  delay(100); //Small delay so that if the laser just briefly passes over diode then we catch it
   }
 }
