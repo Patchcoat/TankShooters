@@ -126,5 +126,5 @@ void loop() {
   Serial.println(BoardIn.LRval);
   Serial.println(BoardIn.FBval);
   
-  delay(100);
+  // delay(100);
 }

@@ -126,21 +126,21 @@ void loop() {
 
   // The back, forward, left, right, brake functions are from the SparkFun_TB6612 library.
   
-  if( (LR_received>2000) && (FB_received>3500) ){
+  if( (LR_received>1500 && LR_received<2300) && (FB_received>4000) ){
     back(motor1, motor2, 150);
   }
-  else if( (LR_received>2000) && (FB_received<150) ){
+  else if( (LR_received>1500) && (FB_received<100) ){
     forward(motor1, motor2, 150);
   }
-  else if( (LR_received<150) && (FB_received>2000) ){
+  else if( (LR_received<100) && (FB_received>1500) ){
     left(motor1, motor2, 150);
   }
-  else if( (LR_received>3500) && (FB_received>3500) ){
+  else if( (LR_received>4000) && (FB_received>1500) ){
     right(motor1, motor2, 150);
   }
   else{
     brake(motor1, motor2);
   }
   
-  delay(100);
+  // delay(100);
 }
