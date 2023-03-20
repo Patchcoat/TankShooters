@@ -22,12 +22,12 @@ uint8_t broadcastAddress[] = {0xCC, 0xDB, 0xA7, 0x02, 0xE1, 0x58}; // Board B
 #define VRY   35
 
 // Define variable to store value to be sent
-int joyX = 0;
-int joyY = 0;
+int LR_send;
+int FB_send;
 
 // Define variable to store value to be received
-int LR_suc;
-int FB_suc;
+int LR_rec;
+int FB_rec;
 
 // Variable to store if sending data was successful
 String success;
@@ -64,15 +64,18 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&BoardIn, incomingData, sizeof(BoardIn));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  LR_suc = BoardIn.LRval;
-  FB_suc =  BoardIn.FBval;
+  LR_rec = BoardIn.LRval;
+  FB_rec =  BoardIn.FBval;
 }
  
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
 
- 
+  pinMode(VRX, OUTPUT);
+  pinMode(VRY, OUTPUT);
+
+
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -102,14 +105,11 @@ void setup() {
  
 void loop() {
   // Set values to send
-  joyX = analogRead(VRX);   // Determine x-position of joystick
-  joyY = analogRead(VRY);   // Determine y-position of joystick
-  Serial.print("joyX: ");
-  Serial.println(joyX);
-  Serial.print("joyY: ");
-  Serial.println(joyY);
-  BoardOut.LRval = joyX;
-  BoardOut.FBval = joyY;
+  LR_send = analogRead(VRX);   // Determine x-position of joystick
+  FB_send = analogRead(VRY);   // Determine y-position of joystick
+
+  BoardOut.LRval = LR_send;
+  BoardOut.FBval = FB_send;
   
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BoardOut, sizeof(BoardOut));
@@ -126,5 +126,5 @@ void loop() {
   Serial.println(BoardIn.LRval);
   Serial.println(BoardIn.FBval);
   
-  // delay(100);
+  // delay(1000);
 }

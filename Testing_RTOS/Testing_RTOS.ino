@@ -25,6 +25,7 @@ Permission to use, copy, modify, and distribute this software and its documentat
 and without fee is hereby granted, provided that this copyright notices appear in all copies 
 and that both those copyright notices and this permission notice appear in supporting documentation.
 **************************************************************************************************/
+<<<<<<< HEAD
 #include <>
 #include <queue.h>
 #include <Servo.h>
@@ -36,6 +37,18 @@ and that both those copyright notices and this permission notice appear in suppo
 #define SRVO_2 33
 
 #define TANK false
+=======
+
+#include <Arduino_FreeRTOS.h>
+#include <queue.h>
+#include <Servo.h>
+
+#define VRX_PIN 34
+#define VRY_PIN 35
+#define SW_PIN  GND
+
+#define TANK 0
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
 
 //Global Variables:
 Servo servo;  // create servo object to control a servo
@@ -59,6 +72,7 @@ void setup()
 
   queue = xQueueCreate(32, sizeof(JoystickValue));
 
+<<<<<<< HEAD
 //#if TANK
   // Tank Tasks
   xTaskCreate(servoWrite, "ServoTask", 100, NULL, 2, NULL);
@@ -71,6 +85,20 @@ void setup()
   //TaskCreate(ledWrite)
 //  xTaskCreate(wirelessReadWriteController, "WirelessTask", 100, NULL, 1, NULL);
 //#endif
+=======
+// #if TANK
+//   // Tank Tasks
+  xTaskCreate(servoWrite, "ServoTask", 100, NULL, 2, NULL);
+//   //TaskCreate(dcMotorWrite)
+//   //TaskCreate(photodiodeRead)
+//   xTaskCreate(wirelessReadWriteTank, "WirelessTask", 100, NULL, 1, NULL);
+// #else
+  // Controller tasks
+  xTaskCreate(joystickRead, "JoystickTask", 100, NULL, 2, NULL);
+  //TaskCreate(ledWrite)
+  // xTaskCreate(wirelessReadWriteController, "WirelessTask", 100, NULL, 1, NULL);
+// #endif
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
   
   xTaskCreate(MyIdleTask, "IdleTask", 100, NULL, 0, NULL);
 }
@@ -81,7 +109,11 @@ void loop()
   // DO nothing
 }
 
+<<<<<<< HEAD
 //#if TANK
+=======
+// #if TANK
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
 /* servoWrite with priority 1 Servo Task*/
 static void servoWrite(void* pvParameters)
 {
@@ -92,7 +124,11 @@ static void servoWrite(void* pvParameters)
 
     JoystickValue jv;
     xQueueReceive(queue, &jv, 4);
+<<<<<<< HEAD
     float servo_angle = (jv.VRx / 1024) * 180;
+=======
+    float servo_angle = (jv.VRx / 4096) * 180;
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
     Serial.println(jv.VRx);
     servo.write(servo_angle);
   }
@@ -108,7 +144,11 @@ static void wirelessReadWriteTank(void* pvParameters)
     // TODO Write value to queue for servo to read
   }
 }
+<<<<<<< HEAD
 //#else
+=======
+// #else
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
 /* Task2 with priority 2 */
 static void joystickRead(void* pvParameters)
 {
@@ -136,7 +176,11 @@ static void wirelessReadWriteController(void* pvParameters)
     
   }
 }
+<<<<<<< HEAD
 //#endif
+=======
+// #endif
+>>>>>>> ac2c7753b0cbf6ad808c21430a6894f33d2e5360
 
 /* Idle Task with priority Zero */ 
 static void MyIdleTask(void* pvParameters)

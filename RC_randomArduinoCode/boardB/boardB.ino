@@ -27,12 +27,12 @@ Motor motor2 = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
 
 
 // Define variable to store value to be sent
-int LR_suc;
-int FB_suc;
+int LR_send;
+int FB_send;
 
 // Define variable to store value to be received
-int LR_received;
-int FB_received;
+int LR_rec;
+int FB_rec;
 
 // Variable to store if sending data was successful
 String success;
@@ -69,8 +69,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&BoardIn, incomingData, sizeof(BoardIn));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  LR_received = BoardIn.LRval;
-  FB_received = BoardIn.FBval;
+  LR_rec = BoardIn.LRval;
+  FB_rec = BoardIn.FBval;
 }
  
 void setup() {
@@ -106,9 +106,10 @@ void setup() {
  
 void loop() {
   // Set values to send
-  BoardOut.LRval = 1;
-  BoardOut.FBval = 1;
-
+  LR_send = 1;
+  FB_send = 1;
+  BoardOut.LRval = LR_send;
+  BoardOut.FBval = FB_send;
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BoardOut, sizeof(BoardOut));
    
@@ -124,23 +125,23 @@ void loop() {
   Serial.println(BoardIn.LRval);
   Serial.println(BoardIn.FBval);
 
-  // The back, forward, left, right, brake functions are from the SparkFun_TB6612 library.
+  // // The back, forward, left, right, brake functions are from the SparkFun_TB6612 library.
   
-  if( (LR_received>1500 && LR_received<2300) && (FB_received>4000) ){
+  if( (LR_rec>1500 && LR_rec<2300) && (FB_rec>4000) ){
     back(motor1, motor2, 150);
   }
-  else if( (LR_received>1500) && (FB_received<100) ){
+  else if( (LR_rec>1500) && (FB_rec<100) ){
     forward(motor1, motor2, 150);
   }
-  else if( (LR_received<100) && (FB_received>1500) ){
+  else if( (LR_rec<100) && (FB_rec>1500) ){
     left(motor1, motor2, 150);
   }
-  else if( (LR_received>4000) && (FB_received>1500) ){
+  else if( (LR_rec>4000) && (FB_rec>1500) ){
     right(motor1, motor2, 150);
   }
   else{
     brake(motor1, motor2);
   }
   
-  // delay(100);
+  // delay(1000);
 }

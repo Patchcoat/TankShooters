@@ -2,3 +2,5 @@ ESP32 Pinout - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/_imag
 ESP32 to ESP32 - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/_images/esp32-devkitC-v4-pinout.png
 Installing ESP32 board in Arduino IDE - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/_images/esp32-devkitC-v4-pinout.png
 Getting ESP32 MAC Address - https://randomnerdtutorials.com/get-change-esp32-esp8266-mac-address-arduino/#:~:text=To%20get%20your%20board%20MAC%20Address%2C%20simply%20upload,as%20shown%20in%20the%20following%20figure.%20That%E2%80%99s%20it%21
+File->Prefences->Additional boards manager URLS - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+Servo Library - https://randomnerdtutorials.com/esp32-servo-motor-web-server-arduino-ide/
