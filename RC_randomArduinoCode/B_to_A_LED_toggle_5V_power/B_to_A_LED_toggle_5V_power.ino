@@ -8,10 +8,12 @@
 #include <Wire.h>
 
 // REPLACE WITH THE MAC Address of your receiver 
-uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board A
+// uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board A
+uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board B
 
-#define RED_LED    34
-#define BLUE_LED   35
+
+#define RED_LED    32
+#define BLUE_LED   33
 
 // Define variable to store value to be sent
 int red_send;
@@ -97,19 +99,19 @@ void setup() {
 void loop() {
   // Set values to send
   if (red_rec == 1){
-    BoardOut.redVal = 1;
+    BoardOut.redVal = !BoardOut.redVal;
     digitalWrite(RED_LED, HIGH);
   }
   else{
-    BoardOut.redVal = 0;
+    BoardOut.redVal = !BoardOut.redVal;
     digitalWrite(RED_LED, LOW);
   }
   if (blue_rec == 1){
-    BoardOut.blueVal = 1;
+    BoardOut.blueVal = !BoardOut.blueVal;
     digitalWrite(BLUE_LED, HIGH);
   }
   else{
-    BoardOut.blueVal = 0;
+    BoardOut.blueVal = !BoardOut.blueVal;
     digitalWrite(BLUE_LED, LOW);
   }
   // Send message via ESP-NOW

@@ -12,5 +12,7 @@ void setup(){
 }
  
 void loop(){
-
+  Serial.println();
+  Serial.print("ESP Board MAC Address:  ");
+  Serial.println(WiFi.macAddress());
 }

@@ -1,14 +1,3 @@
-/*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-now-two-way-communication-esp32/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-*/
-
 #include <esp_now.h>
 #include <WiFi.h>
 
@@ -16,7 +5,8 @@
 
 
 // REPLACE WITH THE MAC Address of your receiver 
-uint8_t broadcastAddress[] = {0xCC, 0xDB, 0xA7, 0x02, 0xE1, 0x58}; // Board B
+uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board B
+
 
 #define VRX   34
 #define VRY   35
@@ -35,19 +25,19 @@ String success;
 //Structure example to send data
 //Must match the receiver structure
 typedef struct struct_message {
-    int LRval;
-    int FBval;
+  int LRval;
+  int FBval;
 } struct_message;
 
-// Create a struct_message called BME280Readings to hold sensor readings
-struct_message BoardOut;
+// Create a struct_message called ToTank for sending values to the tank
+struct_message ToTank;
 
-// Create a struct_message to hold incoming sensor readings
-struct_message BoardIn;
+// Create a struct_message called FromTank to hold incoming tank values (diodes)
+struct_message FromTank;
 
 esp_now_peer_info_t peerInfo;
 
-// Callck when data is sent
+// Callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
@@ -59,22 +49,18 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   }
 }
 
-// Callck when data is received
+// Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(&BoardIn, incomingData, sizeof(BoardIn));
+  memcpy(&FromTank, incomingData, sizeof(FromTank));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  LR_rec = BoardIn.LRval;
-  FB_rec =  BoardIn.FBval;
+  LR_rec = FromTank.LRval;
+  FB_rec =  FromTank.FBval;
 }
  
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
-
-  pinMode(VRX, OUTPUT);
-  pinMode(VRY, OUTPUT);
-
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -108,11 +94,11 @@ void loop() {
   LR_send = analogRead(VRX);   // Determine x-position of joystick
   FB_send = analogRead(VRY);   // Determine y-position of joystick
 
-  BoardOut.LRval = LR_send;
-  BoardOut.FBval = FB_send;
+  ToTank.LRval = LR_send;
+  ToTank.FBval = FB_send;
   
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BoardOut, sizeof(BoardOut));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &ToTank, sizeof(ToTank));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
@@ -120,11 +106,12 @@ void loop() {
   else {
     Serial.println("Error sending the data");
   }
+
   // Display Readings in Serial Monitor
   Serial.println("INCOMING READINGS");
-  Serial.print("Value Board B Sent: ");
-  Serial.println(BoardIn.LRval);
-  Serial.println(BoardIn.FBval);
+  Serial.print("Values Tank Sent: ");
+  Serial.println(LR_rec);
+  Serial.println(FB_rec);
   
-  // delay(1000);
+  // delay(100);
 }

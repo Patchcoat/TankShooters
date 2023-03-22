@@ -1,15 +1,10 @@
-/*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-now-two-way-communication-esp32/
-*/
-
 #include <esp_now.h>
 #include <WiFi.h>
 #include <Wire.h>
 #include <SparkFun_TB6612.h>
 
 // REPLACE WITH THE MAC Address of your receiver 
-uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board A
+uint8_t broadcastAddress[] = {0x8C, 0xAA, 0xB5, 0xB5, 0x98, 0x94}; // Board A
 
 #define AIN1    12
 #define BIN1    14
@@ -44,15 +39,15 @@ typedef struct struct_message {
     int FBval;
 } struct_message;
 
-// Create a struct_message called BME280Readings to hold sensor readings
-struct_message BoardOut;
+// Create a struct_message called FromTank to send values from the tank (diodes)
+struct_message FromTank;
 
-// Create a struct_message to hold incoming sensor readings
-struct_message BoardIn;
+// Create a struct_message called ToTank to hold incoming controller readings
+struct_message ToTank;
 
 esp_now_peer_info_t peerInfo;
 
-// Callck when data is sent
+// Callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
@@ -64,13 +59,13 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   }
 }
 
-// Callck when data is received
+// Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(&BoardIn, incomingData, sizeof(BoardIn));
+  memcpy(&ToTank, incomingData, sizeof(ToTank));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  LR_rec = BoardIn.LRval;
-  FB_rec = BoardIn.FBval;
+  LR_rec = ToTank.LRval;
+  FB_rec = ToTank.FBval;
 }
  
 void setup() {
@@ -106,12 +101,11 @@ void setup() {
  
 void loop() {
   // Set values to send
-  LR_send = 1;
-  FB_send = 1;
-  BoardOut.LRval = LR_send;
-  BoardOut.FBval = FB_send;
+  FromTank.LRval = 1;
+  FromTank.FBval = 1;
+
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BoardOut, sizeof(BoardOut));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &FromTank, sizeof(FromTank));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
@@ -121,9 +115,9 @@ void loop() {
   }
   // Display Readings in Serial Monitor
   Serial.println("INCOMING READINGS");
-  Serial.print("Value Board A Sent: ");
-  Serial.println(BoardIn.LRval);
-  Serial.println(BoardIn.FBval);
+  Serial.print("Values Controller Sent: ");
+  Serial.println(LR_rec);
+  Serial.println(FB_rec);
 
   // // The back, forward, left, right, brake functions are from the SparkFun_TB6612 library.
   
@@ -143,5 +137,5 @@ void loop() {
     brake(motor1, motor2);
   }
   
-  // delay(1000);
+  // delay(100);
 }

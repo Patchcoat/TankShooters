@@ -1,26 +1,29 @@
-/*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-now-two-way-communication-esp32/
-*/
-
 #include <esp_now.h>
 #include <WiFi.h>
 #include <Wire.h>
 
-// REPLACE WITH THE MAC Address of your receiver 
-// uint8_t broadcastAddress[] = {0xCC, 0xDB, 0xA7, 0x02, 0xE1, 0x58}; // Board B
-uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE0, 0x98}; // Board C
 
-#define RED_LED    32
-#define BLUE_LED   33
+// REPLACE WITH THE MAC Address of your receiver 
+// uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0xE8, 0xCE, 0xA0}; // Board D
+uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x76, 0xE4, 0x30}; // Board B
+
+
+#define TANK_VRX   25
+#define TANK_VRY   26
+#define SERVO_VRX  32
+#define SERVO_VRY  33
 
 // Define variable to store value to be sent
-int red_send;
-int blue_send;
+int TLR_send;
+int TFB_send;
+int SLR_send;
+int SUD_send;
 
 // Define variable to store value to be received
-int red_rec;
-int blue_rec;
+int TLR_rec;
+int TFB_rec;
+int SLR_rec;
+int SUD_rec;
 
 // Variable to store if sending data was successful
 String success;
@@ -28,19 +31,21 @@ String success;
 //Structure example to send data
 //Must match the receiver structure
 typedef struct struct_message {
-    int redVal;
-    int blueVal;
+  int TLRval;
+  int TFBval;
+  int SLRval;
+  int SUDval;
 } struct_message;
 
-// Create a struct_message called BME280Readings to hold sensor readings
-struct_message BoardOut;
+// Create a struct_message called ToTank for sending values to the tank
+struct_message ToTank;
 
-// Create a struct_message to hold incoming sensor readings
-struct_message BoardIn;
+// Create a struct_message called FromTank to hold incoming tank values (diodes)
+struct_message FromTank;
 
 esp_now_peer_info_t peerInfo;
 
-// Callck when data is sent
+// Callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
@@ -52,21 +57,20 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   }
 }
 
-// Callck when data is received
+// Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(&BoardIn, incomingData, sizeof(BoardIn));
+  memcpy(&FromTank, incomingData, sizeof(FromTank));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  red_rec = BoardIn.redVal;
-  blue_rec = BoardIn.blueVal;
+  TLR_rec = FromTank.TLRval;
+  TFB_rec =  FromTank.TFBval;
+  SLR_rec = FromTank.SLRval;
+  SUD_rec = FromTank.SUDval;
 }
  
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
- 
-  pinMode(RED_LED, OUTPUT);
-  pinMode(BLUE_LED, OUTPUT);
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -97,24 +101,18 @@ void setup() {
  
 void loop() {
   // Set values to send
-  if (red_rec == 1){
-    BoardOut.redVal = 1;
-    digitalWrite(RED_LED, HIGH);
-  }
-  else{
-    BoardOut.redVal = 0;
-    digitalWrite(RED_LED, LOW);
-  }
-  if (blue_rec == 1){
-    BoardOut.blueVal = 1;
-    digitalWrite(BLUE_LED, HIGH);
-  }
-  else{
-    BoardOut.blueVal = 0;
-    digitalWrite(BLUE_LED, LOW);
-  }
+  TLR_send = analogRead(TANK_VRX);   // Determine x-position of tank joystick
+  TFB_send = analogRead(TANK_VRY);   // Determine y-position of tank joystick
+  SLR_send = analogRead(SERVO_VRX);   // Determine x-position of servo joystick
+  SUD_send = analogRead(SERVO_VRY);   // Determine y-position of servo joystick
+
+  ToTank.TLRval = TLR_send;
+  ToTank.TFBval = TFB_send;
+  ToTank.SLRval = SLR_send;
+  ToTank.SUDval = SUD_send;
+  
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BoardOut, sizeof(BoardOut));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &ToTank, sizeof(ToTank));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
@@ -122,11 +120,13 @@ void loop() {
   else {
     Serial.println("Error sending the data");
   }
+
   // Display Readings in Serial Monitor
   Serial.println("INCOMING READINGS");
-  Serial.print("Value Board B Sent: ");
-  Serial.println(BoardIn.redVal);
-  Serial.println(BoardIn.blueVal);
+  Serial.print("Values Tank Sent: ");
+  Serial.print(TLR_rec);
+  Serial.println(TFB_rec);
+  Serial.print(SLR_rec);
+  Serial.println(SUD_rec);
   
-  delay(1000);
 }
