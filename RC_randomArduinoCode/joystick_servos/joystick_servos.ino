@@ -48,7 +48,7 @@ void setup() {
 
   pinMode(LASER_PIN, OUTPUT);
 
-  //button.setDebounceTime(50);
+  // button.setDebounceTime(50);
 }
 
 // Fancy clamp function made by Spencer to keep positions between 0° and 180°
@@ -65,6 +65,7 @@ int clamp(int min, int max, int angle) {
 void loop() {
   button.loop();
   // If it has been longer than the predefined update interval, then begin updating
+
   //   lastUpdateTime = millis();    // update the value of the last time that we updated to just now or 0ms
 
   // read analog X and Y values from joystick pins
@@ -101,14 +102,17 @@ void loop() {
 
   // print data to Serial Monitor on Arduino IDE
   Serial.print("Servo Motor's Angle: ");
+
   Serial.printf("X angle =  %d     Y angle = %d\n", xAngle, yAngle);
 
   switchValue = button.getState();
   Serial.printf("Switch Value = %s\n", switchValue ? "True" : "False");
+
   if(!switchValue){
     digitalWrite(LASER_PIN, HIGH);
   }
   else{
     digitalWrite(LASER_PIN, LOW);
   }
+
 }
