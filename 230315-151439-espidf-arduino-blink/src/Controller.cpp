@@ -6,16 +6,22 @@
 */
 
 #include <stdio.h>
+#include <esp_now.h>
+#include <WiFi.h>
+#include <Wire.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/gpio.h>
 #include "sdkconfig.h"
 #include "queue.h"
+#include "packet.h"
 #include <Arduino.h>
 
 /* Can run 'make menuconfig' to choose the GPIO to blink,
    or you can edit the following line and set a number here.
 */
+
+uint8_t broadcastAddress[] = {0x0,0x0,0x0,0x0,0x0,0x0};
 
 #define VRX1_PIN (gpio_num_t) 34
 #define VRY1_PIN (gpio_num_t) 35
@@ -23,23 +29,20 @@
 #define VRX2_PIN (gpio_num_t) 32
 #define VRY2_PIN (gpio_num_t) 33
 
-typedef struct JoystickValue {
-    float VRx = 0;
-    float VRy = 0;
-    bool SW = false;
-} JoystickValue;
-typedef struct ControllerPacket {
-    JoystickValue joystick1;
-    JoystickValue joystick2;
-} ControllerPacket;
-typedef struct TankPacket {
-    bool hit;
-    bool dead;
-} TankPacket;
-
 Queue controller_queue;
 Queue tank_queue;
 bool dead;
+
+esp_now_peer_info_t peerInfo;
+
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+}
+
+void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
+    TankPacket tank_packet;
+    memcpy(&tank_packet, incomingData, sizeof(tank_packet));
+    queue_push_back(&tank_queue, &tank_packet);
+}
 
 static void wireless(void *pvParameters) {
     while (1) {
@@ -47,11 +50,8 @@ static void wireless(void *pvParameters) {
         ControllerPacket controller_packet;
         int value_exists = queue_pop_front(&controller_queue, &controller_packet);
         if (value_exists) {
-            // Send wireless data
+            esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &controller_packet, sizeof(controller_packet));
         }
-        // Read wireless data
-        TankPacket tank_packet;
-        queue_push_back(&tank_queue, &tank_packet);
     }
 }
 
@@ -74,6 +74,28 @@ void setup() {
     xTaskCreatePinnedToCore(wireless, "WirelessComm", 1000, NULL, 2, NULL, 0);
     queue_free(&controller_queue);
     queue_free(&tank_queue);
+
+    WiFi.mode(WIFI_STA);
+
+    // Init ESP-NOW
+    if (esp_now_init() != ESP_OK) {
+        Serial.println("Error initializing ESP-NOW");
+        return;
+    }
+
+    esp_now_register_send_cb(OnDataSent);
+
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+
+    // Add peer
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+        Serial.println("Failed to add peer");
+        return;
+    }
+
+    esp_now_register_recv_cb(OnDataRecv);
 }
 void loop() {
     vTaskDelay(200 / portTICK_PERIOD_MS);
